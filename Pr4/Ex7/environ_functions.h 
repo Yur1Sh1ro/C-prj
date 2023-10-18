@@ -1,0 +1,12 @@
+#ifndef ENVIRON_FUNCTIONS_H
+#define ENVIRON_FUNCTIONS_H
+
+void display_environment();
+void display_environment_value(const char *variable);
+void set_environment_value(const char *variable, const char *value);
+void assign_environment_value(const char *variable, const char *value);
+void delete_environment_value(const char *variable);
+void clear_environment();
+void display_help();
+
+#endif
