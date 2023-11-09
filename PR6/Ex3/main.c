@@ -1,67 +1,52 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
-// Функція для генерації псевдовипадкових чисел і виведення їх
-void *random_number_thread(void *args) {
-    int num = *((int *)args);
-    
-    srand(time(NULL)); // Ініціалізація генератора випадкових чисел
+// Потокова функція для виведення заданого рядка
+void *printString(void *arg) {
+    char *str = (char *)arg;
+    int repeat = 10; // Кількість разів для виведення
 
-    for (int i = 0; i < num; i++) {
-        int random_num = rand() % 100; // Генеруємо випадкове число від 0 до 99
-        printf("Random Thread. Number: %d\n", random_num);
-
-        if (random_num == 42) {
-            printf("Random Thread. Found the meaning of life (42) and exiting.\n");
-            pthread_exit(NULL);
-        }
-
-        sleep(1); // Засипаємо потік на 1 секунду
+    for (int i = 1; i <= repeat; i++) {
+        printf("Thread 1: %s %d\n", str, i);
     }
 
     pthread_exit(NULL);
 }
 
-// Функція для виведення заданого рядка задану кількість разів
-void *string_thread(void *args) {
-    struct ThreadArgs {
-        char *str;
-        int num;
-    };
-    struct ThreadArgs *thread_args = (struct ThreadArgs *)args;
+// Потокова функція для генерації випадкових чисел
+void *generateRandomNumbers(void *arg) {
+    int range = 100; // Діапазон генерації чисел
+    int target = 42; // Задане псевдовипадкове число, при якому потік завершує роботу
 
-    for (int i = 0; i < thread_args->num; i++) {
-        printf("String Thread. String: %s\n", thread_args->str);
-        sleep(1); // Засипаємо потік на 1 секунду
+    srand(time(NULL)); // Ініціалізуємо генератор випадкових чисел
+
+    while (1) {
+        int num = rand() % range;
+
+        printf("Thread 2: Random Number %d\n", num);
+
+        if (num == target) {
+            printf("Thread 2: Found the target number %d. Exiting.\n", target);
+            break;
+        }
     }
 
     pthread_exit(NULL);
 }
 
 int main() {
-    pthread_t random_thread, string_thread;
-    int num_random = 20; // Кількість випадкових чисел для генерації
-    int num_strings = 10; // Кількість повторень рядка
+    pthread_t thread1, thread2;
+    char *str = "Hello, World";
 
-    // Створюємо потоки та передаємо їм параметри
-    if (pthread_create(&random_thread, NULL, random_number_thread, &num_random) != 0) {
-        fprintf(stderr, "Помилка при створенні потоку для генерації чисел.\n");
-        return 1;
-    }
+    pthread_create(&thread1, NULL, printString, str);
+    pthread_create(&thread2, NULL, generateRandomNumbers, NULL);
 
-    struct ThreadArgs string_args = {"Hello, World!", num_strings};
-    if (pthread_create(&string_thread, NULL, string_thread, &string_args) != 0) {
-        fprintf(stderr, "Помилка при створенні потоку для рядків.\n");
-        return 1;
-    }
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
 
-    // Чекаємо завершення обох потоків
-    pthread_join(random_thread, NULL);
-    pthread_join(string_thread, NULL);
-
-    printf("Main Thread. All child threads have finished.\n");
+    printf("Main Thread: All child threads have completed.\n");
 
     return 0;
 }

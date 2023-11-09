@@ -1,44 +1,30 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 
-void *thread_function(void *args) {
-    // Розпаковуємо параметри зі структури
-    struct ThreadArgs {
-        char *name;
-        char *str;
-        int num;
-    };
-    struct ThreadArgs *thread_args = (struct ThreadArgs *)args;
-    
-    // Виводимо повідомлення з відповідними параметрами
-    for (int i = 1; i <= thread_args->num; i++) {
-        printf("Thread %s. Str %d\n", thread_args->name, i);
+// Функція, яку виконуватимуть потоки
+void *threadFunction(void *arg) {
+    char *name = ((char **)arg)[0];
+    char *str = ((char **)arg)[1];
+    int num = *((int *)arg);
+
+    for (int i = 1; i <= num; i++) {
+        printf("Thread %s. %s %d\n", name, str, i);
     }
-    
-    return NULL;
+
+    pthread_exit(NULL);
 }
 
 int main() {
-    // Створюємо 4 набори параметрів для потоків
-    struct ThreadArgs thread_args[4] = {
-        {"A", "Hello", 3},
-        {"B", "World", 4},
-        {"C", "OpenAI", 2},
-        {"D", "Example", 5}
-    };
-
     pthread_t threads[4];
-    
-    // Створюємо 4 потоки та передаємо їм параметри
+    char *names[4] = {"A", "B", "C", "D"};
+    char *str = "Hello";
+    int num = 5;
+
     for (int i = 0; i < 4; i++) {
-        if (pthread_create(&threads[i], NULL, thread_function, &thread_args[i]) != 0) {
-            fprintf(stderr, "Помилка при створенні потоку.\n");
-            return 1;
-        }
+        char *args[2] = {names[i], str};
+        pthread_create(&threads[i], NULL, threadFunction, args);
     }
 
-    // Чекаємо завершення кожного потоку
     for (int i = 0; i < 4; i++) {
         pthread_join(threads[i], NULL);
     }
