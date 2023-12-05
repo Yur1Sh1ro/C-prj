@@ -38,7 +38,10 @@ void init_semaphore(int sem_id, int sem_value) {
 }
 
 void P(int sem_id) {
-    struct sembuf operations[1] = {{0, -1, 0}};
+    struct sembuf operations[1];
+    operations[0].sem_num = 0;
+    operations[0].sem_op = -1;
+    operations[0].sem_flg = 0;
     if (semop(sem_id, operations, 1) == -1) {
         perror("semop P");
         exit(1);
@@ -46,7 +49,10 @@ void P(int sem_id) {
 }
 
 void V(int sem_id) {
-    struct sembuf operations[1] = {{0, 1, 0}};
+    struct sembuf operations[1];
+    operations[0].sem_num = 0;
+    operations[0].sem_op = 1;
+    operations[0].sem_flg = 0;
     if (semop(sem_id, operations, 1) == -1) {
         perror("semop V");
         exit(1);
@@ -95,7 +101,7 @@ int main(int argc, char *argv[]) {
         P(sem_id);
 
         for (i = 0; i < n; i++) {
-            printf("Enter number: ");
+            printf("Введіть число: ");
             scanf("%d", &input);
             memcpy((int *)shm_ptr + i, &input, sizeof(int));
         }

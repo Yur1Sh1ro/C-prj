@@ -6,13 +6,13 @@
 void signalHandler(int signalNum) {
     switch(signalNum) {
         case SIGINT:
-            printf("Caught SIGINT (^_^)\n");
+            printf("Caught SIGINT \n");
             break;
         case SIGTERM:
-            printf("Caught SIGTERM (^o^)\n");
+            printf("Caught SIGTERM \n");
             break;
         case SIGUSR1:
-            printf("Caught SIGUSR1 (*_*)\n");
+            printf("Caught SIGUSR1  \n");
             exit(0);
     }
 }
@@ -23,31 +23,15 @@ int main() {
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
 
-    if (sigaction(SIGINT, &sa, NULL) == -1) {
-        perror("Error setting up SIGINT handler");
-        exit(EXIT_FAILURE);
-    }
-    if (sigaction(SIGTERM, &sa, NULL) == -1) {
-        perror("Error setting up SIGTERM handler");
-        exit(EXIT_FAILURE);
-    }
-    if (sigaction(SIGUSR1, &sa, NULL) == -1) {
-        perror("Error setting up SIGUSR1 handler");
-        exit(EXIT_FAILURE);
-    }
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGUSR1, &sa, NULL);
 
-    if (signal(SIGPROF, SIG_DFL) == SIG_ERR) {
-        perror("Error setting up SIGPROF handler");
-        exit(EXIT_FAILURE);
-    }
-    if (signal(SIGHUP, SIG_IGN) == SIG_ERR) {
-        perror("Error setting up SIGHUP handler");
-        exit(EXIT_FAILURE);
-    }
+    signal(SIGPROF, SIG_DFL);
+    signal(SIGHUP, SIG_IGN);
 
     while(1) {
         pause();
     }
-
     return 0;
 }

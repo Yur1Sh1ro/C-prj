@@ -9,7 +9,7 @@ void alarmHandler(int sig) {
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
-        fprintf(stderr, "Использование: %s <время в секундах> <сообщение>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <time in seconds> <message>\n", argv[0]);
         return 1;
     }
 
@@ -19,20 +19,20 @@ int main(int argc, char *argv[]) {
     pid_t pid = fork();
 
     if (pid < 0) {
-        perror("Ошибка при вызове fork");
+        perror("fork failed");
         exit(1);
     }
 
     if (pid == 0) {
-        // дочерний процесс
+        // child
         signal(SIGALRM, alarmHandler);
         alarm(time);
         pause();
-        printf("Сигнал будильника: %s\n", message);
+        printf("Alarm: %s\n", message);
         exit(0);
     } else {
-        // родительский процесс
-        printf("Будильник установлен на %d секунд. PID процесса будильника: %d\n", time, pid);
+        // parent
+        printf("Alarm set for %d seconds. PID of alarm process: %d\n", time, pid);
         exit(0);
     }
     return 0;

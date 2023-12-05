@@ -13,16 +13,24 @@ union semun {
     struct seminfo *__buf;
 };
 
+// P (wait)
 void P(int sem_id) {
-    struct sembuf op = { 0, -1, SEM_UNDO };
+    struct sembuf op;
+    op.sem_num = 0; // index
+    op.sem_op = -1; // operation
+    op.sem_flg = SEM_UNDO;
     if (semop(sem_id, &op, 1) == -1) {
         perror("semop P failed");
         exit(EXIT_FAILURE);
     }
 }
 
+// V (signal)
 void V(int sem_id) {
-    struct sembuf op = { 0, 1, SEM_UNDO };
+    struct sembuf op;
+    op.sem_num = 0;
+    op.sem_op = 1;
+    op.sem_flg = SEM_UNDO;
     if (semop(sem_id, &op, 1) == -1) {
         perror("semop V failed");
         exit(EXIT_FAILURE);
@@ -36,7 +44,7 @@ int sem_id;
 void signal_handler(int sig) {
     printf("Client: Signal handler received signal %d\n", sig);
     if (sig == SIGUSR1) {
-        int sum = 0, i = 0, val;
+        int shm_id, sum = 0, i = 0, val;
 
         printf("Client: Locking semaphore before reading data...\n");
         P(sem_id);
@@ -62,7 +70,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <shm_id> <sem_id>\n", argv[0]);
         return 1;
     }
-
     printf("Client: Connecting to shared memory...\n");
     shm_id = atoi(argv[1]);
     sem_id = atoi(argv[2]);
@@ -72,14 +79,12 @@ int main(int argc, char *argv[]) {
         perror("shmat");
         exit(1);
     }
-
     printf("Client: Connecting to semaphore...\n");
     signal(SIGUSR1, signal_handler);
 
     while (1) {
         pause();
     }
-
     shmdt(shm_ptr);
     return 0;
 }
